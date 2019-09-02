@@ -1,6 +1,6 @@
 #include "Screen.h"
 
-Screen::Screen(): window(NULL), renderer(NULL), texture(NULL), buffer1(NULL), buffer2(NULL)
+Screen::Screen(): window(NULL), renderer(NULL), texture(NULL), buffer1(NULL), buffer2(NULL), buffer_color(NULL), buffer_color2(NULL)
 {
 	
 
@@ -57,6 +57,9 @@ bool Screen::init()
 	buffer1 = new Uint32[SCREEN_WIDTH * SCREEN_HEIGHT];
 	buffer2 = new Uint32[SCREEN_WIDTH * SCREEN_HEIGHT];
 
+	buffer_color = new Color[SCREEN_WIDTH * SCREEN_HEIGHT];
+	buffer_color2 = new Color [SCREEN_WIDTH * SCREEN_HEIGHT];
+
 	memset(buffer1, 0, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(Uint32));
 	memset(buffer2, 0, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(Uint32));
 	
@@ -109,7 +112,19 @@ void Screen::setPixelColor(int x, int y, Uint32 red, Uint32 green, Uint32 blue)
 	color <<= 8;
 	color += 0xFF;
 
+	Color colorObject =  Color(red, green, blue);
+	buffer_color[(y * SCREEN_WIDTH) + x] = colorObject;
 	buffer1[(y * SCREEN_WIDTH) + x] = color;
+}
+
+void Screen::setPixelColor(int x, int y, Color color)
+{
+	if (x < 0 || x >= SCREEN_WIDTH || y < 0 || y >= SCREEN_HEIGHT) {
+		return;
+	}
+
+	buffer_color[(y * SCREEN_WIDTH) + x] = color;
+	setPixelColor(x, y, color.red, color.green, color.blue);
 }
 void Screen::clear()
 {
@@ -119,18 +134,12 @@ void Screen::clear()
 
 void Screen::boxBlur() {
 	// Swap the buffers, so pixel is in m_buffer2 and we are drawing to m_buffer1.
-	Uint32* temp = buffer1;
-	buffer1 = buffer2;
-	buffer2 = temp;
+	Color* temp = buffer_color;
+	buffer_color = buffer_color2;
+	buffer_color2 = temp;
 
 	for (int y = 0; y < SCREEN_HEIGHT; y++) {
 		for (int x = 0; x < SCREEN_WIDTH; x++) {
-
-			/*
-			 * 0 0 0
-			 * 0 1 0
-			 * 0 0 0
-			 */
 
 			int redTotal = 0;
 			int greenTotal = 0;
@@ -142,23 +151,21 @@ void Screen::boxBlur() {
 					int currentY = y + row;
 
 					if (currentX >= 0 && currentX < SCREEN_WIDTH && currentY >= 0 && currentY < SCREEN_HEIGHT) {
-						Uint32 color = buffer2[currentY * SCREEN_WIDTH + currentX];
+						Color color = buffer_color2[currentY * SCREEN_WIDTH + currentX];
 
-						Uint32 red = color >> 24;
-						Uint32 green = color >> 16;
-						Uint32 blue = color >> 8;
 
-						redTotal += red;
-						greenTotal += green;
-						blueTotal += blue;
+						redTotal += color.red;
+						greenTotal += color.green;
+						blueTotal += color.blue;
 					}
 				}
 			}
 
+			
 			Uint32 red = redTotal / 9;
 			Uint32 green = greenTotal / 9;
 			Uint32 blue = blueTotal / 9;
-
+			
 			setPixelColor(x, y, red, green, blue);
 		}
 	}

@@ -1,6 +1,7 @@
 #pragma once
 #include <SDL.h>
 #include <iostream>
+#include "Color.h"
 class Screen
 {
 public:
@@ -14,6 +15,8 @@ private:
 	SDL_Texture* texture;
 	Uint32* buffer1;
 	Uint32* buffer2;
+	Color* buffer_color;
+	Color* buffer_color2;
 public:
 	Screen();
 	bool init();
@@ -22,6 +25,7 @@ public:
 	void boxBlur();
 	void update();
 	void setPixelColor(int x, int y, Uint32 red, Uint32 green, Uint32 blue);
+	void setPixelColor(int x, int y, Color color);
 	void clear();
 
 

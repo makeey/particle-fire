@@ -10,16 +10,6 @@ int main(int argc, char* argv[])
 {
 
 
-	Uint32 color = 0x12345678;
-	int trueted = (color & 0xFF000000) >> 26;
-	int red = color >> 4;
-	cout << (color >> 24) << endl;
-
-	int test;
-	cin >> test;
-	return 0;
-
-
 
 	srand(time(NULL));
 	Screen screen;
@@ -34,7 +24,7 @@ int main(int argc, char* argv[])
 	while (!quit)
 	{
 		int tick = SDL_GetTicks();
-		screen.clear();
+	
 		swarm.update(tick);
 		unsigned char green = (unsigned char)((1 + sin(tick * 0.0001)) * 128);
 		unsigned char red = (unsigned char)((1 + sin(tick * 0.0002)) * 128);
